@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head><meta charset="UTF-8"><title>Video Inspect</title>
+<style>body{background:#111;margin:0;} video{width:100%;display:block;}</style>
+</head>
+<body>
+<video id="v" src="LiveOps Ecosystem Video.mp4" controls></video>
+<canvas id="c" style="display:none;"></canvas>
+<script>
+  window.grabFrame = function() {
+    const v = document.getElementById('v');
+    const c = document.getElementById('c');
+    c.width = v.videoWidth;
+    c.height = v.videoHeight;
+    c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+    return c.toDataURL('image/png');
+  };
+  window.seekTo = function(t) {
+    return new Promise((resolve) => {
+      const v = document.getElementById('v');
+      v.currentTime = t;
+      v.onseeked = () => resolve(true);
+    });
+  };
+</script>
+</body>
+</html>

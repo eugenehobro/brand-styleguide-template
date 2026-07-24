@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>
+  body {
+    font-family: -apple-system, 'Segoe UI', sans-serif;
+    font-size: 12px;
+    margin: 0;
+    padding: 16px;
+    color: #1a1a1a;
+  }
+  h1 { font-size: 13px; margin: 0 0 12px; }
+  .row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  input[type="text"] {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+  button {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    background: #18a0fb;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  button:hover { background: #0d8ce0; }
+  button.secondary { background: #e5e5e5; color: #333; }
+  button.secondary:hover { background: #d5d5d5; }
+  label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  #status {
+    margin-top: 12px;
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 11px;
+    white-space: pre-wrap;
+    max-height: 160px;
+    overflow-y: auto;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .dot.ok { background: #14ae5c; }
+  .dot.err { background: #f24822; }
+  .dot.idle { background: #b3b3b3; }
+</style>
+</head>
+<body>
+  <h1>Claude Draw Bridge</h1>
+
+  <div class="row">
+    <input type="text" id="urlInput" value="http://localhost:4599/figma-bridge/commands.json" />
+  </div>
+
+  <div class="row">
+    <button id="runNow">Run now</button>
+    <button id="resetBatch" class="secondary">Clear last batch</button>
+  </div>
+
+  <div class="row">
+    <label><input type="checkbox" id="autoSync" checked /> Auto-sync every 2s</label>
+  </div>
+
+  <div id="status"><span class="dot idle"></span>Waiting…</div>
+
+  <script>
+    const urlInput = document.getElementById('urlInput');
+    const statusEl = document.getElementById('status');
+    const autoSyncBox = document.getElementById('autoSync');
+    let timer = null;
+    let lastRevisionSeen = null;
+
+    function setStatus(msg, kind) {
+      const dotClass = kind === 'ok' ? 'ok' : kind === 'err' ? 'err' : 'idle';
+      statusEl.innerHTML = `<span class="dot ${dotClass}"></span>${msg}`;
+    }
+
+    async function fetchAndRun(force) {
+      const url = urlInput.value.trim();
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) {
+          setStatus(`Fetch failed: HTTP ${res.status}`, 'err');
+          return;
+        }
+        const data = await res.json();
+        if (!force && data.revision === lastRevisionSeen) {
+          setStatus(`Up to date (revision ${data.revision})`, 'idle');
+          return;
+        }
+        parent.postMessage({ pluginMessage: { type: 'run-commands', payload: data } }, '*');
+        lastRevisionSeen = data.revision;
+      } catch (err) {
+        setStatus('Error: ' + err.message, 'err');
+      }
+    }
+
+    document.getElementById('runNow').addEventListener('click', () => fetchAndRun(true));
+    document.getElementById('resetBatch').addEventListener('click', () => {
+      parent.postMessage({ pluginMessage: { type: 'clear-batch' } }, '*');
+    });
+
+    autoSyncBox.addEventListener('change', () => {
+      if (autoSyncBox.checked) {
+        timer = setInterval(() => fetchAndRun(false), 2000);
+      } else {
+        clearInterval(timer);
+      }
+    });
+
+    // start auto-sync by default
+    timer = setInterval(() => fetchAndRun(false), 2000);
+    fetchAndRun(true);
+
+    // messages coming back from the plugin main thread
+    onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (!msg) return;
+      if (msg.type === 'result') {
+        setStatus(msg.ok ? `✓ ${msg.text}` : `✗ ${msg.text}`, msg.ok ? 'ok' : 'err');
+      }
+    };
+  </script>
+</body>
+</html>

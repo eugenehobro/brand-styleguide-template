@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"/e/BRINC/Claude Projects/.claude/skills\")",
+      "Bash(unzip -o \"/c/Users/Eugene/Downloads/ds-ingest.zip\" -x \"__MACOSX/*\" -d .)",
+      "Bash(unzip -o \"/c/Users/Eugene/Downloads/ds-build.zip\" -x \"__MACOSX/*\" -d .)",
+      "Bash(rm -rf \"/e/BRINC/Claude Projects/.claude/skills/__MACOSX\" && find \"/e/BRINC/Claude Projects/.claude/skills\" -type f)",
+      "mcp__visualize__show_widget",
+      "mcp__mcp-registry__search_mcp_registry",
+      "mcp__figma-desktop__get_design_context",
+      "mcp__figma-desktop__get_variable_defs",
+      "Bash(mkdir -p \"Integrations Landing Page/Iteration #01_Integrations Landing Page\")",
+      "Bash(mkdir -p \"Integrations Landing Page/Iteration #02_Integrations Landing Page\")",
+      "Bash(mv integrations/*.html \"Integrations Landing Page/Iteration #01_Integrations Landing Page/\")",
+      "Bash(mv brinc-integrations.html \"Integrations Landing Page/Iteration #02_Integrations Landing Page/\")",
+      "Bash(rmdir integrations *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:4599/Integrations%20Landing%20Page/Iteration%20%2302_Integrations%20Landing%20Page/brinc-integrations.html\")",
+      "Bash(curl -s \"http://localhost:4599/Integrations%20Landing%20Page/Iteration%20%2302_Integrations%20Landing%20Page/brinc-integrations.html\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:4599/Integrations%20Landing%20Page/Iteration%20%2301_Integrations%20Landing%20Page/index.html\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:4599/Integrations%20Landing%20Page/Iteration%20%2301_Integrations%20Landing%20Page/shotspotter.html\")",
+      "Bash(ls -la \"/c/Users/Eugene/Downloads/\" | grep -i \"liveops\" *)",
+      "Bash(mkdir -p \"LiveOps Ecosystem Video/source\")",
+      "Bash(cp \"/c/Users/Eugene/Downloads/LiveOps Ecosystem Video \\(1\\).mp4\" \"LiveOps Ecosystem Video/source/LiveOps Ecosystem Video.mp4\")",
+      "Bash(mkdir -p \"/c/Users/Eugene/AppData/Local/Temp/claude/E--BRINC-Claude-Projects/272968f7-934e-40c2-a059-f9b52375f437/scratchpad/video-frames\")",
+      "Bash(cat)",
+      "Bash(base64 -d \"/c/Users/Eugene/AppData/Local/Temp/claude/E--BRINC-Claude-Projects/272968f7-934e-40c2-a059-f9b52375f437/scratchpad/video-frames/frame_t1.b64\")",
+      "Read(//c/Users/Eugene/AppData/Local/Temp/claude/E--BRINC-Claude-Projects/272968f7-934e-40c2-a059-f9b52375f437/scratchpad/**)",
+      "Bash(awk NR>=1454 && NR<=1471 {print NR\": \"length\\($0\\)\" chars\"} *)",
+      "Bash(awk 'NR==1454 || \\(NR>=1456 && NR<=1471\\)' brinc-integrations.html)",
+      "Bash(awk 'NR==1455' brinc-integrations.html)",
+      "Bash(powershell -NoProfile -Command \"Get-ChildItem 'E:\\\\BRINC\\\\Claude Projects\\\\Components' -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem 'E:\\\\BRINC\\\\Claude Projects\\\\prototypes\\\\LiveOps Ecosystem Video' -Recurse -ErrorAction SilentlyContinue | Select-Object FullName\")"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "figma-desktop"
+  ]
+}

@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LiveOps Ecosystem — Animated Diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-sans: 'Manrope', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+
+    --brand-blue: #00d2ff;
+    --brand-black: #0a0a0a;
+    --brand-white: #f9f9f9;
+
+    --card-bg: #131313;
+    --card-border: rgba(249, 249, 249, 0.08);
+    --icon-bg: #1e1e1e;
+    --line-color: #2c2c2c;
+    --text-muted: rgba(249, 249, 249, 0.45);
+    --text-subtle: rgba(249, 249, 249, 0.55);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--brand-black);
+    color: var(--brand-white);
+    font-family: var(--font-sans);
+  }
+
+  .stage {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px;
+  }
+
+  .ecosystem-diagram {
+    position: relative;
+    width: 100%;
+    max-width: 1360px;
+    aspect-ratio: 1516 / 609;
+  }
+
+  .connectors { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+  .connectors path.visible-line {
+    fill: none;
+    stroke: var(--line-color);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 0.9s ease-out;
+  }
+
+  .connectors path.visible-line.is-drawn {
+    stroke-dashoffset: 0;
+  }
+
+  .col-label {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: clamp(9px, 0.9vw, 11px);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    opacity: 0;
+    transform: translateY(8px);
+    animation: fade-up 0.6s ease-out forwards;
+  }
+
+  .col-label.left  { left: 2%;  top: 4%; }
+  .col-label.right { left: 78%; top: 6.5%; }
+
+  @keyframes fade-up {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .eco-card {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 0 16px;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: fade-up 0.6s ease-out forwards;
+  }
+
+  .eco-card .icon {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--icon-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .eco-card .icon svg { width: 18px; height: 18px; color: var(--brand-white); }
+
+  .eco-card .copy { min-width: 0; }
+
+  .eco-card .title {
+    font-size: clamp(11px, 1.05vw, 14px);
+    font-weight: 700;
+    color: var(--brand-white);
+    white-space: nowrap;
+  }
+
+  .eco-card .subtitle {
+    font-size: clamp(9px, 0.85vw, 11.5px);
+    font-weight: 400;
+    color: var(--text-subtle);
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  /* Left column */
+  .eco-card.side-left { left: 2%; width: 20%; height: 11.82%; }
+  .eco-card.side-left.pos-1 { top: 13.96%; }
+  .eco-card.side-left.pos-2 { top: 29.06%; }
+  .eco-card.side-left.pos-3 { top: 44.17%; }
+  .eco-card.side-left.pos-4 { top: 59.28%; }
+  .eco-card.side-left.pos-5 { top: 74.39%; }
+
+  /* Right column — mirrors the left column: same width, same gap to the center card */
+  .eco-card.side-right { left: 78%; width: 20%; height: 11.82%; }
+  .eco-card.side-right.pos-1 { top: 21.51%; }
+  .eco-card.side-right.pos-2 { top: 36.62%; }
+  .eco-card.side-right.pos-3 { top: 51.73%; }
+  .eco-card.side-right.pos-4 { top: 66.84%; }
+
+  .center-card {
+    position: absolute;
+    left: 34%;
+    top: 25.45%;
+    width: 32%;
+    height: 49.26%;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4% 6%;
+    opacity: 0;
+    transform: scale(0.94);
+    animation: reveal-center 0.5s ease-out forwards;
+    animation-delay: 1.5s;
+  }
+
+  @keyframes reveal-center {
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .center-card .brinc-logo {
+    width: clamp(140px, 17vw, 260px);
+    margin-bottom: clamp(6px, 1vw, 14px);
+  }
+
+  .center-card .brinc-logo svg { width: 100%; height: auto; display: block; }
+
+  .center-card .tagline {
+    font-family: var(--font-mono);
+    font-size: clamp(9px, 0.85vw, 12px);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-blue);
+    margin-bottom: clamp(8px, 1.4vw, 16px);
+  }
+
+  .center-card .desc {
+    font-size: clamp(10px, 1.05vw, 15px);
+    line-height: 1.5;
+    color: var(--text-subtle);
+    max-width: 46ch;
+  }
+
+  @media (max-width: 720px) {
+    .eco-card .subtitle { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="ecosystem-diagram">
+
+    <svg class="connectors" id="connectorsSvg">
+      <defs>
+        <filter id="dotGlow" x="-200%" y="-200%" width="500%" height="500%">
+          <feGaussianBlur stdDeviation="2.2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+    </svg>
+
+    <div class="col-label left">Calls for service</div>
+    <div class="col-label right">Real time policing ecosystem</div>
+
+    <!-- Left column cards -->
+    <div class="eco-card side-left pos-1">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg>
+      </div>
+      <div class="copy">
+        <div class="title">CAD</div>
+        <div class="subtitle">Computer aided dispatch</div>
+      </div>
+    </div>
+
+    <div class="eco-card side-left pos-2">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2 7 4-14 3 10 2-3h5"/></svg>
+      </div>
+      <div class="copy">
+        <div class="title">Gunshot Detection</div>
+        <div class="subtitle">Acoustic sensor alert</div>
+      </div>
+    </div>
+
+    <div class="eco-card side-left pos-3">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M20 8V6a2 2 0 0 0-2-2h-2M4 16v2a2 2 0 0 0 2 2h2M20 16v2a2 2 0 0 1-2 2h-2"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <div class="copy">
+        <div class="title">ALPR</div>
+        <div class="subtitle">Automated License Plate Recognition</div>
+      </div>
+    </div>
+
+    <div class="eco-card side-left pos-4">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4c0 9 7 16 16 16l1-4-5-2-2 2c-2-1-4-3-5-5l2-2-2-5-4-1z"/></svg>
+      </div>
+      <div class="copy">
+        <div class="title">911 Audio Sharing</div>
+        <div class="subtitle">Live caller audio</div>
+      </div>
+    </div>
+
+    <div class="eco-card side-left pos-5">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6 3 12l5 6M16 6l5 6-5 6"/></svg>
+      </div>
+      <div class="copy">
+        <div class="title">Open API</div>
+        <div class="subtitle">Third party integrations</div>
+      </div>
+    </div>
+
+    <!-- Center card -->
+    <div class="center-card">
+      <div class="brinc-logo" aria-label="BRINC">
+        <svg viewBox="0 0 111.204 25.5384" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4.10811 0.0668655C4.6068 0.0668655 4.85519 0.317166 4.85519 0.813946V6.89186H17.588C19.1051 6.89186 20.3834 7.02369 21.4247 7.28355C22.466 7.54531 23.2972 7.95038 23.9201 8.50639C24.543 9.06049 24.9901 9.77509 25.2614 10.6445C25.5327 11.5157 25.6703 12.5628 25.6703 13.7856V18.6751C25.6703 19.8979 25.5346 20.945 25.2614 21.8163C24.9901 22.6876 24.543 23.4021 23.9201 23.9543C23.2972 24.5084 22.4641 24.9116 21.4247 25.16C20.3834 25.4103 19.1032 25.5345 17.588 25.5345H8.08235C6.54234 25.5345 5.25835 25.4103 4.22849 25.16C3.19862 24.9116 2.37321 24.5084 1.75032 23.9543C1.12743 23.4002 0.680332 22.6876 0.409014 21.8163C0.137696 20.945 0.000125701 19.8979 0.000125701 18.6751V0.815857C0.000125701 0.317166 0.25998 0.0687762 0.779688 0.0687762H4.10811V0.0668655ZM4.85519 10.9674V17.7236C4.85519 18.4477 4.9106 19.0477 5.02525 19.5234C5.13798 19.9992 5.33669 20.3775 5.61947 20.6603C5.90225 20.9431 6.28057 21.1475 6.75633 21.2717C7.2321 21.3959 7.83014 21.459 8.55621 21.459H17.1142C17.8613 21.459 18.4727 21.3978 18.9485 21.2717C19.4242 21.1475 19.8025 20.9431 20.0853 20.6603C20.3681 20.3775 20.5668 19.9992 20.6795 19.5234C20.7923 19.0477 20.8496 18.4496 20.8496 17.7236V14.7028C20.8496 14.0015 20.7923 13.4073 20.6795 12.9201C20.5649 12.4329 20.3681 12.0488 20.0853 11.766C19.8025 11.4833 19.4242 11.2788 18.9485 11.1546C18.4727 11.0304 17.8613 10.9674 17.1142 10.9674H4.85519Z" fill="#F9F9F9"/>
+          <path d="M47.162 6.89433C47.5709 6.89433 47.7734 7.09877 47.7734 7.50575V10.3584C47.7734 10.7673 47.569 10.9698 47.162 10.9698H38.1301C37.406 10.9698 36.806 11.0329 36.3303 11.1571C35.8545 11.2813 35.4762 11.4857 35.1934 11.7685C34.9106 12.0513 34.7119 12.4353 34.5992 12.9226C34.4845 13.4098 34.4291 14.004 34.4291 14.7052V24.7899C34.4291 25.2886 34.1788 25.537 33.682 25.537H30.3555C29.8339 25.537 29.576 25.2886 29.576 24.7899V13.7862C29.576 12.5634 29.7116 11.5163 29.9849 10.645C30.2562 9.77374 30.7033 9.06105 31.3262 8.50695C31.949 7.95285 32.7745 7.54587 33.8043 7.28411C34.8342 7.02426 36.1182 6.89242 37.6582 6.89242H47.162V6.89433Z" fill="#F9F9F9"/>
+          <path d="M54.5953 0C55.094 0 55.3424 0.250301 55.3424 0.747081V3.97233C55.3424 4.49395 55.0921 4.75189 54.5953 4.75189H51.2688C50.7472 4.75189 50.4873 4.49204 50.4873 3.97233V0.747081C50.4873 0.24839 50.7472 0 51.2688 0H54.5953ZM54.5953 6.89378C55.094 6.89378 55.3424 7.15554 55.3424 7.67334V24.7874C55.3424 25.2861 55.0921 25.5345 54.5953 25.5345H51.2688C50.7701 25.5345 50.5217 25.2861 50.5217 24.7874V7.67334C50.5217 7.15172 50.7701 6.89378 51.2688 6.89378H54.5953Z" fill="#F9F9F9"/>
+          <path d="M77.3893 6.89433C78.9063 6.89433 80.1846 7.02617 81.2259 7.28602C82.2673 7.54779 83.0984 7.95285 83.7213 8.50886C84.3442 9.06296 84.7913 9.77756 85.0626 10.6469C85.3339 11.5182 85.4696 12.5653 85.4696 13.7881V24.7899C85.4696 25.2886 85.2193 25.537 84.7225 25.537H81.396C80.8973 25.537 80.6489 25.2886 80.6489 24.7899V14.9403C80.6489 14.239 80.603 13.6448 80.5132 13.1576C80.4215 12.6704 80.2457 12.2863 79.9859 12.0035C79.7241 11.7207 79.3687 11.5163 78.9159 11.3921C78.4631 11.2679 77.8746 11.2049 77.1504 11.2049H68.1186C67.3944 11.2049 66.7945 11.2679 66.3187 11.3921C65.8429 11.5163 65.4646 11.7207 65.1818 12.0035C64.8991 12.2863 64.7003 12.6704 64.5876 13.1576C64.473 13.6448 64.4176 14.239 64.4176 14.9403V24.788C64.4176 25.2867 64.1673 25.535 63.6705 25.535H60.344C59.8223 25.535 59.5625 25.2867 59.5625 24.788V13.7862C59.5625 12.5634 59.6982 11.5163 59.9714 10.645C60.2427 9.77374 60.6898 9.06105 61.3127 8.50695C61.9356 7.95285 62.761 7.54587 63.7909 7.28411C64.8207 7.02426 66.1047 6.89242 67.6447 6.89242H77.3893V6.89433Z" fill="#F9F9F9"/>
+          <path d="M110.593 6.89384C111.001 6.89384 111.204 7.09828 111.204 7.50526V10.3579C111.204 10.7668 111 10.9693 110.593 10.9693H97.4164C96.6694 10.9693 96.0579 11.0324 95.5822 11.1566C95.1064 11.2808 94.7338 11.4852 94.4625 11.768C94.1912 12.0508 93.9982 12.4348 93.8855 12.9221C93.7708 13.4093 93.7154 14.0035 93.7154 14.7047V17.7275C93.7154 18.4516 93.7708 19.0516 93.8855 19.5273C93.9982 20.0031 94.1912 20.3814 94.4625 20.6642C94.7338 20.947 95.1083 21.1514 95.5822 21.2756C96.0579 21.3998 96.6694 21.4629 97.4164 21.4629H110.591C110.998 21.4629 111.202 21.6673 111.202 22.0743V24.927C111.202 25.3358 110.998 25.5384 110.591 25.5384H96.9407C95.4006 25.5384 94.1167 25.4142 93.0868 25.1639C92.0569 24.9155 91.2315 24.5123 90.6086 23.9582C89.9857 23.4041 89.5386 22.6914 89.2673 21.8202C88.996 20.9489 88.8604 19.9018 88.8604 18.679V13.7838C88.8604 12.5609 88.996 11.5139 89.2673 10.6426C89.5386 9.77134 89.9857 9.05865 90.6086 8.50455C91.2315 7.95045 92.0569 7.54347 93.0868 7.28171C94.1167 7.02185 95.4006 6.89001 96.9407 6.89001L110.593 6.89384Z" fill="#F9F9F9"/>
+        </svg>
+      </div>
+      <div class="tagline">Drone as First Responder</div>
+      <p class="desc">Receives the call for service, launches a drone to the scene, and streams live intelligence back to the ecosystem.</p>
+    </div>
+
+    <!-- Right column cards -->
+    <div class="eco-card side-right pos-1">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.2"/><rect x="13" y="3" width="8" height="8" rx="1.2"/><rect x="3" y="13" width="8" height="8" rx="1.2"/><rect x="13" y="13" width="8" height="8" rx="1.2"/></svg>
+      </div>
+      <div class="copy">
+        <div class="title">RTCC</div>
+        <div class="subtitle">Real time crime center</div>
+      </div>
+    </div>
+
+    <div class="eco-card side-right pos-2">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/></svg>
+      </div>
+      <div class="copy">
+        <div class="title">CommandCentral Aware</div>
+        <div class="subtitle">Common operating picture</div>
+      </div>
+    </div>
+
+    <div class="eco-card side-right pos-3">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="13" height="12" rx="1.5"/><path d="M15.5 10.5 21 7v10l-5.5-3.5"/></svg>
+      </div>
+      <div class="copy">
+        <div class="title">RTSPS Feed</div>
+        <div class="subtitle">Live drone video stream</div>
+      </div>
+    </div>
+
+    <div class="eco-card side-right pos-4">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+      </div>
+      <div class="copy">
+        <div class="title">DEMS</div>
+        <div class="subtitle">Post action reports and evidence</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var svg = document.getElementById('connectorsSvg');
+  var diagram = document.querySelector('.ecosystem-diagram');
+  var centerCard = document.querySelector('.center-card');
+  var CORNER_R = 14;
+
+  function rect(el, ref) {
+    var r = el.getBoundingClientRect();
+    return { left: r.left - ref.left, top: r.top - ref.top, right: r.right - ref.left, bottom: r.bottom - ref.top, width: r.width, height: r.height };
+  }
+
+  function elbow(x1, y1, xT, yC, x2, r) {
+    if (Math.abs(y1 - yC) < 0.5) return 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + yC;
+    var dx1 = xT > x1 ? 1 : -1;
+    var dy = yC > y1 ? 1 : -1;
+    var dx2 = x2 > xT ? 1 : -1;
+    var rr = Math.min(r, Math.abs(yC - y1) / 2, Math.abs(xT - x1) / 2);
+    return 'M' + x1 + ',' + y1 +
+      ' L' + (xT - dx1 * rr) + ',' + y1 +
+      ' Q' + xT + ',' + y1 + ' ' + xT + ',' + (y1 + dy * rr) +
+      ' L' + xT + ',' + (yC - dy * rr) +
+      ' Q' + xT + ',' + yC + ' ' + (xT + dx2 * rr) + ',' + yC +
+      ' L' + x2 + ',' + yC;
+  }
+
+  function svgEl(tag, attrs) {
+    var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (var k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+
+  function build() {
+    var defs = svg.querySelector('defs');
+    [].slice.call(svg.childNodes).forEach(function (node) { if (node !== defs) svg.removeChild(node); });
+
+    var dRect = diagram.getBoundingClientRect();
+    svg.setAttribute('viewBox', '0 0 ' + Math.round(dRect.width) + ' ' + Math.round(dRect.height));
+
+    var leftCards = [].slice.call(document.querySelectorAll('.eco-card.side-left')).sort(function (a, b) {
+      return a.getBoundingClientRect().top - b.getBoundingClientRect().top;
+    });
+    var rightCards = [].slice.call(document.querySelectorAll('.eco-card.side-right')).sort(function (a, b) {
+      return a.getBoundingClientRect().top - b.getBoundingClientRect().top;
+    });
+
+    var cc = rect(centerCard, dRect);
+    var yC = cc.top + cc.height / 2;
+    var leftColRight = rect(leftCards[0], dRect).right;
+    var rightColLeft = rect(rightCards[0], dRect).left;
+    var trunkXLeft = (leftColRight + cc.left) / 2;
+    var trunkXRight = (cc.right + rightColLeft) / 2;
+
+    var visiblePaths = [];
+    var motionPathIds = [];
+
+    // Every card feeds a single shared trunk per side. To avoid any duplicate/overlapping
+    // strokes (the cause of the "mixed lines" look), the trunk is drawn in short straight
+    // segments between junctions, and each junction gets its own small rounded fillet(s) —
+    // one fillet if it's the top/bottom-most row, two (merging into one outward stub) if the
+    // trunk continues on both sides of it. A card that sits exactly level with the center card
+    // is a special case: a single uninterrupted straight line, no fillet needed at all.
+    function buildSide(cards, trunkX, edgeFn, centerEdgeX, prefix) {
+      var rows = cards.map(function (card) {
+        var r = rect(card, dRect);
+        return { y: r.top + r.height / 2, edgeX: edgeFn(r) };
+      });
+
+      var COMBINE_SLOP = 6; // px — treat a row this close to yC as perfectly level (avoids a near-duplicate junction)
+      var junctions = rows.map(function (r) {
+        return { y: r.y, cardEdgeX: r.edgeX, combined: Math.abs(r.y - yC) < COMBINE_SLOP, centerOnly: false };
+      });
+      var centerIsCard = junctions.some(function (j) { return j.combined; });
+      if (!centerIsCard) junctions.push({ y: yC, cardEdgeX: null, combined: false, centerOnly: true });
+      junctions.sort(function (a, b) { return a.y - b.y; });
+
+      var reserved = junctions.filter(function (j) { return !j.combined; });
+      var reservedYs = reserved.map(function (j) { return j.y; });
+      var topY = Math.min.apply(null, reservedYs);
+      var bottomY = Math.max.apply(null, reservedYs);
+      var minGap = Infinity;
+      for (var i = 1; i < reservedYs.length; i++) minGap = Math.min(minGap, reservedYs[i] - reservedYs[i - 1]);
+      if (!isFinite(minGap) || minGap < 1) minGap = CORNER_R * 6;
+      var R = Math.max(4, Math.min(CORNER_R, minGap / 3));
+
+      var dxOut = centerEdgeX > trunkX ? 1 : -1; // trunk -> center direction
+      var dxCard = -dxOut;                        // trunk -> card direction
+
+      function addPath(d) {
+        var p = svgEl('path', { d: d });
+        svg.appendChild(p);
+        visiblePaths.push(p);
+      }
+
+      // Trunk: straight segments only, in the gaps between reserved junctions' fillet zones.
+      var cursor = topY;
+      reserved.forEach(function (j) {
+        if (j.y - R > cursor + 0.5) addPath('M' + trunkX + ',' + cursor + ' L' + trunkX + ',' + (j.y - R));
+        cursor = j.y + R;
+      });
+      if (bottomY > cursor + 0.5) addPath('M' + trunkX + ',' + cursor + ' L' + trunkX + ',' + bottomY);
+
+      // Junction fillets + outward stubs.
+      junctions.forEach(function (j) {
+        if (j.combined) {
+          addPath('M' + j.cardEdgeX + ',' + j.y + ' L' + centerEdgeX + ',' + j.y);
+          return;
+        }
+        var outEdgeX = j.centerOnly ? centerEdgeX : j.cardEdgeX;
+        var stubDir = j.centerOnly ? dxOut : dxCard;
+        var isTop = j.y <= topY + 0.5;
+        var isBottom = j.y >= bottomY - 0.5;
+
+        if (isTop || isBottom) {
+          var vDir = isTop ? 1 : -1; // trunk continues downward from a top junction, upward from a bottom one
+          addPath('M' + trunkX + ',' + (j.y + vDir * R) + ' Q' + trunkX + ',' + j.y + ' ' + (trunkX + stubDir * R) + ',' + j.y +
+            ' L' + outEdgeX + ',' + j.y);
+        } else {
+          addPath('M' + trunkX + ',' + (j.y - R) + ' Q' + trunkX + ',' + j.y + ' ' + (trunkX + stubDir * R) + ',' + j.y);
+          addPath('M' + trunkX + ',' + (j.y + R) + ' Q' + trunkX + ',' + j.y + ' ' + (trunkX + stubDir * R) + ',' + j.y);
+          addPath('M' + (trunkX + stubDir * R) + ',' + j.y + ' L' + outEdgeX + ',' + j.y);
+        }
+      });
+
+      // Full card-to-center path per card, kept invisible — used only as the dot's travel path.
+      rows.forEach(function (row, i) {
+        var full = elbow(row.edgeX, row.y, trunkX, yC, centerEdgeX, CORNER_R);
+        var mp = svgEl('path', { id: prefix + (i + 1), d: full, fill: 'none', stroke: 'none' });
+        svg.appendChild(mp);
+        motionPathIds.push(mp.id);
+      });
+    }
+
+    buildSide(leftCards, trunkXLeft, function (r) { return r.right; }, cc.left, 'pl');
+    buildSide(rightCards, trunkXRight, function (r) { return r.left; }, cc.right, 'pr');
+
+    visiblePaths.forEach(function (p) {
+      p.classList.add('visible-line');
+      p.setAttribute('pathLength', '1');
+    });
+
+    // Force layout to register the undrawn (dashoffset:1) state before flipping to drawn,
+    // so freshly-inserted paths reliably animate instead of racing the class toggle.
+    // (Uses setTimeout rather than requestAnimationFrame — rAF can be suspended entirely
+    // in backgrounded/non-visible tabs, which would silently stop the intro from ever playing.)
+    void svg.getBoundingClientRect();
+    setTimeout(function () {
+      visiblePaths.forEach(function (p, i) {
+        p.style.transitionDelay = (0.5 + i * 0.02) + 's';
+        p.classList.add('is-drawn');
+      });
+    }, 20);
+
+    // Dots are driven from a plain setTimeout loop (cx/cy/opacity set directly each tick)
+    // rather than SMIL <animateMotion> — SMIL's `begin` timing for elements created and
+    // inserted via script is unreliable across browsers, which is what made every dot
+    // silently stay invisible at the SVG origin instead of animating.
+    dots.length = 0;
+    var introBase = 2000; // ms
+    var li = 0, ri = 0;
+    motionPathIds.forEach(function (id) {
+      var pathEl = svg.querySelector('#' + id);
+      var len = pathEl.getTotalLength();
+      var begin = id.indexOf('pl') === 0 ? introBase + (li++) * 700 : introBase + 350 + (ri++) * 700;
+      var circle = svgEl('circle', { r: '5', fill: '#00d2ff', filter: 'url(#dotGlow)', opacity: '0' });
+      svg.appendChild(circle);
+      dots.push({ path: pathEl, len: len, begin: begin, circle: circle });
+    });
+  }
+
+  var dots = [];
+  var loopStart = null;
+  var DOT_DUR = 3600;      // ms, full cycle including the gap
+  var TRAVEL_END = 0.55;   // fraction of DOT_DUR spent actually moving; the rest is the gap
+  var FADE_IN = 0.05;
+  var FADE_OUT = TRAVEL_END - 0.05;
+
+  function tick(now) {
+    if (loopStart === null) loopStart = now;
+    var elapsedTotal = now - loopStart;
+    dots.forEach(function (dot) {
+      var t = elapsedTotal - dot.begin;
+      if (t < 0) { dot.circle.setAttribute('opacity', '0'); return; }
+      var phase = t % DOT_DUR;
+      var travelMs = TRAVEL_END * DOT_DUR;
+      if (phase >= travelMs) { dot.circle.setAttribute('opacity', '0'); return; }
+      var frac = phase / travelMs;
+      var pt = dot.path.getPointAtLength(frac * dot.len);
+      dot.circle.setAttribute('cx', pt.x);
+      dot.circle.setAttribute('cy', pt.y);
+      var op = 1;
+      var fadeInMs = FADE_IN * DOT_DUR, fadeOutStartMs = FADE_OUT * DOT_DUR;
+      if (phase < fadeInMs) op = phase / fadeInMs;
+      else if (phase > fadeOutStartMs) op = Math.max(0, (travelMs - phase) / (travelMs - fadeOutStartMs));
+      dot.circle.setAttribute('opacity', String(op));
+    });
+    setTimeout(function () { tick(Date.now()); }, 33);
+  }
+
+  build();
+  tick(Date.now());
+
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(build, 150);
+  });
+})();
+</script>
+
+</body>
+</html>
