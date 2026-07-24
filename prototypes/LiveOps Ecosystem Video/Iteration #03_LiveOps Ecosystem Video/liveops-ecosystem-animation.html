@@ -127,6 +127,11 @@
     margin-top: 2px;
   }
 
+  .eco-card .subtitle.subtitle-2line {
+    line-height: 1.25;
+    margin-top: 1px;
+  }
+
   /* Left column */
   .eco-card.side-left { left: 2%; width: 20%; height: 11.82%; }
   .eco-card.side-left.pos-1 { top: 13.96%; }
@@ -243,7 +248,7 @@
       </div>
       <div class="copy">
         <div class="title">ALPR</div>
-        <div class="subtitle">Automated License Plate Recognition</div>
+        <div class="subtitle subtitle-2line">Automated License Plate<br>Recognition</div>
       </div>
     </div>
 
@@ -333,9 +338,16 @@
   var centerCard = document.querySelector('.center-card');
   var CORNER_R = 14;
 
-  function rect(el, ref) {
-    var r = el.getBoundingClientRect();
-    return { left: r.left - ref.left, top: r.top - ref.top, right: r.right - ref.left, bottom: r.bottom - ref.top, width: r.width, height: r.height };
+  // offsetTop/offsetLeft/offsetWidth/offsetHeight reflect an element's normal-flow layout box and
+  // are immune to CSS transforms — unlike getBoundingClientRect(), which was sampling cards mid
+  // fade-up entrance animation (transform: translateY(8px) -> 0) since build() runs synchronously
+  // right at page load, before that animation has resolved. That threw every card's measured
+  // center ~8px low, which both misaligned each connector's attach point on its own card AND threw
+  // the left trunk off the center card's true middle (the center card only scales, so it wasn't
+  // affected the same way, breaking what should have been a dead-straight middle-row line).
+  // .ecosystem-diagram is the direct offsetParent for every card here, so no ref/loop is needed.
+  function rect(el) {
+    return { left: el.offsetLeft, top: el.offsetTop, right: el.offsetLeft + el.offsetWidth, bottom: el.offsetTop + el.offsetHeight, width: el.offsetWidth, height: el.offsetHeight };
   }
 
   function elbow(x1, y1, xT, yC, x2, r) {
@@ -372,10 +384,10 @@
       return a.getBoundingClientRect().top - b.getBoundingClientRect().top;
     });
 
-    var cc = rect(centerCard, dRect);
+    var cc = rect(centerCard);
     var yC = cc.top + cc.height / 2;
-    var leftColRight = rect(leftCards[0], dRect).right;
-    var rightColLeft = rect(rightCards[0], dRect).left;
+    var leftColRight = rect(leftCards[0]).right;
+    var rightColLeft = rect(rightCards[0]).left;
     var trunkXLeft = (leftColRight + cc.left) / 2;
     var trunkXRight = (cc.right + rightColLeft) / 2;
 
@@ -391,7 +403,7 @@
       var LEVEL_TOL = 2; // px — snap a row onto yC when it's this close, so sub-pixel
                           // measurement noise can't turn a level card into a tiny stray kink
       var rows = cards.map(function (card) {
-        var r = rect(card, dRect);
+        var r = rect(card);
         var y = r.top + r.height / 2;
         if (Math.abs(y - yC) < LEVEL_TOL) y = yC;
         return { y: y, edgeX: edgeFn(r) };
