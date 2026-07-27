@@ -28,7 +28,11 @@
       "Bash(awk NR>=1454 && NR<=1471 {print NR\": \"length\\($0\\)\" chars\"} *)",
       "Bash(awk 'NR==1454 || \\(NR>=1456 && NR<=1471\\)' brinc-integrations.html)",
       "Bash(awk 'NR==1455' brinc-integrations.html)",
-      "Bash(powershell -NoProfile -Command \"Get-ChildItem 'E:\\\\BRINC\\\\Claude Projects\\\\Components' -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem 'E:\\\\BRINC\\\\Claude Projects\\\\prototypes\\\\LiveOps Ecosystem Video' -Recurse -ErrorAction SilentlyContinue | Select-Object FullName\")"
+      "Bash(powershell -NoProfile -Command \"Get-ChildItem 'E:\\\\BRINC\\\\Claude Projects\\\\Components' -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem 'E:\\\\BRINC\\\\Claude Projects\\\\prototypes\\\\LiveOps Ecosystem Video' -Recurse -ErrorAction SilentlyContinue | Select-Object FullName\")",
+      "WebFetch(domain:brincdrones.com)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{content_type} %{size_download}\\\\n\" \"https://brincdrones.com/wp-content/uploads/2026/03/BRINC-unveils-guardian-launching-the-next-era-of-drone-as-first-responder.jpg\")",
+      "Bash(awk 'NR>=2059 && NR<=2079 {print NR\": \"length\\($0\\)}' \"E:\\\\BRINC\\\\Claude Projects\\\\prototypes\\\\Integrations Landing Page\\\\Iteration #04_Integrations Landing Page\\\\brinc-integrations.html\")",
+      "Bash(awk 'NR==2059 {print substr\\($0,1,400\\)}' \"E:\\\\BRINC\\\\Claude Projects\\\\prototypes\\\\Integrations Landing Page\\\\Iteration #04_Integrations Landing Page\\\\brinc-integrations.html\")"
     ]
   },
   "enableAllProjectMcpServers": true,
