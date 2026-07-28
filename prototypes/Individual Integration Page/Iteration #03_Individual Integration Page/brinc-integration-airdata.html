@@ -900,6 +900,13 @@
   body.show-industry-info .tag-pill.industry { display: inline-flex; }
   body.show-industry-info .industry-info-block { display: block; }
   .detail-body { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 64px; padding: 48px 0 40px; }
+  /* Benefits sits inside the same column as the description (not as a full-width sibling
+     after the grid), so its position tracks the description's own height instead of the
+     grid row's height — which the taller sidebar (industry tags + expert card + promo
+     links) was otherwise dictating, leaving a tall dead gap under the shorter description
+     column before Benefits appeared. Gap matches the same 40px rhythm already used for the
+     next related-section transition on this page (Benefits -> FAQ elsewhere). */
+  .detail-main { display: flex; flex-direction: column; gap: 40px; }
   .detail-body h2 { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
   .detail-body p { font-size: 16px; line-height: 1.7; color: var(--neutral-400); margin-bottom: 20px; }
   .detail-body p:last-child { margin-bottom: 0; }
@@ -1175,12 +1182,23 @@
     </div>
 
             <div class="detail-body">
+      <div class="detail-main">
       <div class="description">
         <h2>About this integration</h2>
         <p>AirData is a flight-data management platform used by drone programs to centralize logs, maintenance records, and compliance documentation across mixed fleets of aircraft.</p>
         <p>This integration stores Guardian's flight logs in AirData alongside logs from your other drone platforms, streamlining reporting and maintenance tracking for programs that fly more than one type of aircraft.</p>
         <p>Useful for FAA compliance reporting, fleet utilization analysis, and giving program managers a single source of truth for flight history regardless of which drone flew the mission.</p>
         <p>Available now; connect your AirData account from your BRINC LiveOps settings.</p>
+      </div>
+      <div class="benefits-block">
+        <h2>Benefits</h2>
+        <ul class="benefits-list">
+          <li>Single flight-history record across every aircraft in your fleet, not just Guardian</li>
+          <li>Faster FAA compliance reporting, without manual log exports between systems</li>
+          <li>Fleet-wide utilization data that supports smarter maintenance scheduling</li>
+          <li>One source of truth for program managers, regardless of which drone flew the mission</li>
+        </ul>
+      </div>
       </div>
       <aside class="sidebar">
         <div class="sidebar-block industry-info-block"><h3>Industry</h3><div class="tag-row"><span class="tag-pill industry">Fire</span><span class="tag-pill industry">Law Enforcement</span></div></div>
@@ -1205,16 +1223,6 @@
           </a>
         </div>
       </aside>
-    </div>
-
-    <div class="benefits-block">
-      <h2>Benefits</h2>
-      <ul class="benefits-list">
-        <li>Single flight-history record across every aircraft in your fleet, not just Guardian</li>
-        <li>Faster FAA compliance reporting, without manual log exports between systems</li>
-        <li>Fleet-wide utilization data that supports smarter maintenance scheduling</li>
-        <li>One source of truth for program managers, regardless of which drone flew the mission</li>
-      </ul>
     </div>
 
     <!-- Cross-promo CTAs — option 2: 50/50 split banner, now placed after Benefits (dev options: Cross-Promo CTAs / Option 2) -->
