@@ -214,12 +214,21 @@
      standalone "LiveOps Ecosystem Video" prototype. Kept in its native 1516:609 aspect
      ratio via aspect-ratio + max-width so it scales without ever being cropped.
      Default (this block) matches Iteration #05 exactly, so QHD and larger screens render
-     the same size/proportions as before. The @media block below is the ONLY place it
-     shrinks, and only for full HD (1920px) and narrower, so the filters section is visible
-     right below the hero instead of running off-screen on smaller monitors. Card/type sizes
-     in that block are overridden with fixed px (not the vw-clamps above) because at this
-     viewport width the clamps were still resolving to their QHD max — the box got smaller
-     but the text didn't, so labels ran past their card edges. ---- */
+     the same size/proportions as before.
+
+     FullHD sizing (the @media block further down) shrinks ONLY `.ecosystem-diagram`'s
+     max-width — every card's width/height/position is already a % of that box, so they
+     scale down in lockstep automatically, no separate override needed. The one thing that
+     used to break that was font/icon/spacing sizes below being defined with `vw` units,
+     which are relative to the *viewport*, not this container — so at any viewport ≳1330px
+     wide those clamps kept resolving to their QHD max no matter how small the container
+     got, and the box shrank while the text didn't. Fix: `container-type: inline-size` below
+     turns this element into a query container, and every size that should track the box
+     (not the screen) uses `cqw` (% of *this container's* width) instead of `vw`. That makes
+     the whole diagram — box, text, icons, spacing — scale as one uniform copy of itself,
+     matching Iteration #05's proportions exactly at any size, rather than each dimension
+     being hand-tuned per breakpoint (which is what silently broke this same fix repeatedly
+     across earlier rounds — see [[project_integrations_landing_page]] for the blow-by-blow). ---- */
   .hero-visual { width: 100%; margin: 48px 0 0; }
 
   .ecosystem-diagram {
@@ -234,6 +243,7 @@
     max-width: 1360px;
     margin: 0 auto;
     aspect-ratio: 1516 / 609;
+    container-type: inline-size;
   }
 
   .ecosystem-diagram .connectors { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
@@ -256,7 +266,7 @@
   .ecosystem-diagram .col-label {
     position: absolute;
     font-family: var(--font-mono);
-    font-size: clamp(9px, 0.9vw, 11px);
+    font-size: clamp(7px, 0.9cqw, 11px);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-muted);
@@ -277,11 +287,11 @@
     position: absolute;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: clamp(8px, 0.882cqw, 12px);
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 12px;
-    padding: 0 16px;
+    border-radius: clamp(8px, 0.882cqw, 12px);
+    padding: 0 clamp(11px, 1.176cqw, 16px);
     opacity: 0;
     transform: translateY(8px);
     animation: eco-fade-up 0.6s ease-out forwards;
@@ -290,28 +300,28 @@
 
   .ecosystem-diagram .eco-card .icon {
     flex-shrink: 0;
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
+    width: clamp(24px, 2.5cqw, 34px);
+    height: clamp(24px, 2.5cqw, 34px);
+    border-radius: clamp(6px, 0.588cqw, 8px);
     background: var(--icon-bg);
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .ecosystem-diagram .eco-card .icon svg { width: 18px; height: 18px; color: var(--brand-white); }
+  .ecosystem-diagram .eco-card .icon svg { width: clamp(12px, 1.324cqw, 18px); height: clamp(12px, 1.324cqw, 18px); color: var(--brand-white); }
 
   .ecosystem-diagram .eco-card .copy { min-width: 0; }
 
   .ecosystem-diagram .eco-card .title {
-    font-size: clamp(11px, 1.05vw, 14px);
+    font-size: clamp(8px, 1.05cqw, 14px);
     font-weight: 700;
     color: var(--brand-white);
     white-space: nowrap;
   }
 
   .ecosystem-diagram .eco-card .subtitle {
-    font-size: clamp(9px, 0.85vw, 11.5px);
+    font-size: clamp(7px, 0.85cqw, 11.5px);
     font-weight: 400;
     color: var(--text-subtle);
     white-space: nowrap;
@@ -346,7 +356,7 @@
     height: 49.26%;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 16px;
+    border-radius: clamp(11px, 1.176cqw, 16px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -364,62 +374,34 @@
   }
 
   .ecosystem-diagram .center-card .brinc-logo {
-    width: clamp(140px, 17vw, 260px);
-    margin-bottom: clamp(6px, 1vw, 14px);
+    width: clamp(90px, 17cqw, 260px);
+    margin-bottom: clamp(4px, 1cqw, 14px);
   }
 
   .ecosystem-diagram .center-card .brinc-logo svg { width: 100%; height: auto; display: block; }
 
   .ecosystem-diagram .center-card .desc {
-    font-size: clamp(10px, 1.05vw, 15px);
+    font-size: clamp(8px, 1.05cqw, 15px);
     line-height: 1.5;
     color: var(--text-subtle);
     max-width: 46ch;
+    width: 100%;
   }
 
   /* This block MUST stay after the base .ecosystem-diagram rules above (not before them):
-     these selectors match the base rules' specificity exactly, so if this block came first,
-     the cascade's tie-break-by-source-order would let the later base rule win regardless of
-     viewport, silently no-op'ing every override below. (That's exactly what happened here for
-     several rounds before this comment was added — moved down after tracing why FullHD-only
-     changes weren't rendering at all.) */
+     .ecosystem-diagram's own selector matches the base rule's specificity exactly, so if this
+     block came first, the cascade's tie-break-by-source-order would let the later base rule
+     win regardless of viewport, silently no-op'ing the override below. (That's exactly what
+     happened here for several rounds before this comment was added.)
+
+     This is now the ONLY rule needed for FullHD: every card/text/icon/spacing size above is
+     defined relative to this container (%, or cqw via container-type), so shrinking just the
+     container's max-width scales the entire diagram — box and graphics together — as one
+     proportional copy of the QHD version, matching Iteration #05 at a smaller size instead of
+     redrawing its proportions by hand per element. */
   @media (max-width: 1920px) {
     .hero-visual { margin: 24px 0 0; }
-    .ecosystem-diagram { max-width: 968px; } /* +10% over the old 880px, to give card text more room */
-
-    .ecosystem-diagram .col-label { font-size: 9.5px; }
-
-    .ecosystem-diagram .eco-card { gap: 8px; padding: 0 12px; }
-    .ecosystem-diagram .eco-card .icon { width: 28px; height: 28px; border-radius: 7px; }
-    .ecosystem-diagram .eco-card .icon svg { width: 15px; height: 15px; }
-    .ecosystem-diagram .eco-card .title { font-size: 11.5px; white-space: normal; }
-    .ecosystem-diagram .eco-card .subtitle { font-size: 9.5px; white-space: normal; }
-
-    /* wider (24% -> 30%, +25%) so long labels (e.g. "Post action reports and evidence" on
-       DEMS, "Common operating picture" on CommandCentral Aware) fit fully inside the card
-       instead of running past its right edge, and taller (11.82% -> 13%, +10%) so the
-       2-line ALPR subtitle ("Automated License Plate / Recognition") has room — since every
-       card shares one height value, that one drives all of them. Top values are shifted up
-       by half the added height so each card stays centered on its original position. */
-    .ecosystem-diagram .eco-card.side-left { width: 30%; }
-    .ecosystem-diagram .eco-card.side-right { left: 68%; width: 30%; }
-    .ecosystem-diagram .eco-card.side-left,
-    .ecosystem-diagram .eco-card.side-right { height: 13%; }
-    .ecosystem-diagram .eco-card.side-left.pos-1 { top: 13.37%; }
-    .ecosystem-diagram .eco-card.side-left.pos-2 { top: 28.47%; }
-    .ecosystem-diagram .eco-card.side-left.pos-3 { top: 43.58%; }
-    .ecosystem-diagram .eco-card.side-left.pos-4 { top: 58.69%; }
-    .ecosystem-diagram .eco-card.side-left.pos-5 { top: 73.80%; }
-    .ecosystem-diagram .eco-card.side-right.pos-1 { top: 20.92%; }
-    .ecosystem-diagram .eco-card.side-right.pos-2 { top: 36.03%; }
-    .ecosystem-diagram .eco-card.side-right.pos-3 { top: 51.14%; }
-    .ecosystem-diagram .eco-card.side-right.pos-4 { top: 66.25%; }
-
-    /* center card: widened slightly (32% -> 34%, re-centered) to give the desc paragraph
-       enough room to land on 4 lines; logo cut roughly in half per feedback */
-    .ecosystem-diagram .center-card { left: 33%; width: 34%; padding: 3% 4%; }
-    .ecosystem-diagram .center-card .brinc-logo { width: 75px; margin-bottom: 10px; }
-    .ecosystem-diagram .center-card .desc { font-size: 10px; max-width: min(34ch, 100%); }
+    .ecosystem-diagram { max-width: 968px; }
   }
 
   @media (max-width: 720px) {
@@ -943,7 +925,14 @@
   .tag-pill.industry, .industry-info-block { display: none; }
   body.show-industry-info .tag-pill.industry { display: inline-flex; }
   body.show-industry-info .industry-info-block { display: block; }
-  .detail-body { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 64px; padding: 48px 0 80px; }
+  .detail-body { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 64px; padding: 48px 0 40px; }
+  /* Benefits sits inside the same column as the description (not as a full-width sibling
+     after the grid), so its position tracks the description's own height instead of the
+     grid row's height — which the taller sidebar (industry tags + expert card + promo
+     links) was otherwise dictating, leaving a tall dead gap under the shorter description
+     column before Benefits appeared. Gap matches the same 40px rhythm used for the
+     Benefits -> FAQ transition elsewhere on this page. */
+  .detail-main { display: flex; flex-direction: column; gap: 40px; }
   .detail-body h2 { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
   .detail-body p { font-size: 16px; line-height: 1.7; color: var(--neutral-400); margin-bottom: 20px; }
   .detail-body p:last-child { margin-bottom: 0; }
@@ -1149,35 +1138,48 @@
      Figma node 66-13161) — same eyebrow/button header, same real product imagery, same
      feature-pill treatment — per Figma nodes 66-11542 (LiveOps) and 66-12583 (Playbook). */
   .end-section { padding: 24px 0 0; }
-  .end-cards-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
-  .end-card { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--card-radius); padding: 32px 40px 40px; display: flex; flex-direction: column; }
+  .end-cards-row { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; gap: 24px; margin-bottom: 24px; }
+  /* Cards kept full-width (grid still 1fr 1fr) — "smaller" here means shorter, not narrower,
+     per the height-comparison callout, so only the padding/image/tile sizes below the header
+     are cut. Header row itself (padding-top, its own margin-bottom) is left untouched, since
+     that part was explicitly approved as-is. */
+  .end-card { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--card-radius); padding: 32px 40px 24px; display: flex; flex-direction: column; }
   .end-card-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
   .end-card-eyebrow { font-family: var(--font-mono); font-size: 10px; }
   .end-card-btn { height: 36px; padding: 0 18px; font-size: 13px; flex-shrink: 0; }
-  .end-card-wordmark { font-size: 26px; font-weight: 700; color: var(--brand-white); margin: 0 0 24px; }
-  .end-card-wordmark span { color: var(--brand-blue); }
 
-  /* Not CTAs — plain labelled boxes wired to the screen with connector lines, per Figma. */
-  .end-card-liveops-body { display: flex; align-items: center; gap: 0; }
-  .end-feature-chips { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0; }
-  .end-feature-chip { display: flex; align-items: center; height: 40px; padding: 0 16px; border-radius: 10px; background: #1e1e1e; font-size: 13px; color: var(--brand-white); white-space: nowrap; }
-  .end-liveops-connector { width: 40px; height: 140px; flex-shrink: 0; overflow: visible; }
-  .end-liveops-connector path { fill: none; stroke: rgba(249, 249, 249, 0.15); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-  .end-card-monitor-img { flex: 1; min-width: 0; width: 100%; height: auto; }
+  /* Centered label sits between the eyebrow tag and the button on both cards. Centered via
+     position:absolute + translate rather than a grid `auto 1fr auto` — the tag and button
+     are different widths (e.g. "Comprehensive Guide" vs "Playbook"), so a shared 1fr middle
+     column centers within the *leftover* space, not the card, and reads visibly off-center. */
+  .end-card-header { position: relative; }
+  .end-card-label { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight: 600; color: var(--brand-white); white-space: nowrap; }
+  .end-card-label-accent { color: var(--brand-blue); }
 
-  .end-card-header-playbook { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px; }
-  .end-card-label { font-size: 14px; font-weight: 600; color: var(--brand-white); text-align: center; }
-  .end-card-booklet-img { display: block; max-width: 260px; width: 100%; height: auto; margin: 0 auto 28px; }
-  .end-card-title { font-size: 18px; font-weight: 600; color: var(--brand-white); margin: 0 0 16px; line-height: 1.4; }
-  .end-card-highlights { list-style: none; display: flex; flex-direction: column; gap: 10px; margin: 0; }
-  .end-card-highlights li { position: relative; padding-left: 22px; font-size: 14px; line-height: 1.6; color: var(--neutral-400); }
-  .end-card-highlights li::before { content: ''; position: absolute; left: 0; top: 7px; width: 6px; height: 6px; border-radius: 50%; background: var(--brand-blue); }
+  .end-card-monitor-img { display: block; max-width: 60%; width: 100%; height: auto; margin: 0 auto; }
+
+  .end-liveops-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+  .end-liveops-feature-tile { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 56px; padding: 8px 10px; border-radius: 10px; background: #1e1e1e; font-size: 12px; font-weight: 500; color: var(--brand-white); line-height: 1.3; }
+
+  /* Fixed max-height (not flex-grow) — Playbook has more non-image content (title + 3
+     bullets) than LiveOps has below its monitor, so matching card heights means the image
+     here must be independently capped smaller than the monitor, not left to grow and pull
+     the shared row (align-items:stretch) taller along with it. */
+  .end-card-booklet-wrap { display: flex; align-items: center; justify-content: center; }
+  .end-card-booklet-img { display: block; max-height: 225px; width: auto; max-width: 100%; margin: 0 auto 16px; }
+  /* margin-top:auto pushes the title+bullets block to the card's bottom edge, flush with
+     the LiveOps tile row's bottom, regardless of the image's exact size above it. Safe
+     against the same growth trap as the image: auto margins consume leftover space in the
+     *final* layout pass and don't feed into the grid's natural-size measurement the way a
+     flex-grow content child does, so this can't inflate the row height like last time. */
+  .end-card-title { font-size: 15px; font-weight: 600; color: var(--brand-white); margin: auto 0 10px; line-height: 1.4; }
+  .end-card-highlights { list-style: none; display: flex; flex-direction: column; gap: 6px; margin: 0; }
+  .end-card-highlights li { position: relative; padding-left: 18px; font-size: 13px; line-height: 1.5; color: var(--neutral-400); }
+  .end-card-highlights li::before { content: ''; position: absolute; left: 0; top: 6px; width: 5px; height: 5px; border-radius: 50%; background: var(--brand-blue); }
 
   @media (max-width: 900px) {
     .end-cards-row { grid-template-columns: 1fr; }
-    .end-card-liveops-body { flex-direction: column; align-items: stretch; }
-    .end-feature-chips { flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
-    .end-liveops-connector { display: none; }
+    .end-liveops-features { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -1465,30 +1467,28 @@
           <div class="end-card end-card-liveops">
             <div class="end-card-header">
               <span class="tag-pill end-card-eyebrow">Operations Software</span>
+              <span class="end-card-label">live<span class="end-card-label-accent">Ops</span></span>
               <a class="btn-ghost end-card-btn" href="https://brincdrones.com/liveops/" target="_blank" rel="noopener">Explore <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
             </div>
-            <h3 class="end-card-wordmark">live<span>Ops</span></h3>
-            <div class="end-card-liveops-body">
-              <div class="end-feature-chips">
-                <span class="end-feature-chip">Teleoperations</span>
-                <span class="end-feature-chip">Livestreaming</span>
-                <span class="end-feature-chip">2-way Comms</span>
-              </div>
-              <svg class="end-liveops-connector" viewBox="0 0 40 140" aria-hidden="true">
-                <path d="M0,20 H16 V120 M16,70 H40" />
-                <path d="M0,70 H16" />
-                <path d="M0,120 H16" />
-              </svg>
-              <img class="end-card-monitor-img" src="../assets/liveops-monitor.png" alt="BRINC LiveOps dashboard showing camera feeds, a live map, and fleet status on a monitor" />
+            <img class="end-card-monitor-img" src="../assets/liveops-monitor.png" alt="BRINC LiveOps dashboard showing camera feeds, a live map, and fleet status on a monitor" />
+            <div class="end-liveops-features">
+              <span class="end-liveops-feature-tile">Evidence Management</span>
+              <span class="end-liveops-feature-tile">Team and Device Management</span>
+              <span class="end-liveops-feature-tile">API integrations</span>
+              <span class="end-liveops-feature-tile">Teleoperations</span>
+              <span class="end-liveops-feature-tile">Livestreaming</span>
+              <span class="end-liveops-feature-tile">2-way Comms</span>
             </div>
           </div>
           <div class="end-card end-card-playbook">
-            <div class="end-card-header end-card-header-playbook">
+            <div class="end-card-header">
               <span class="tag-pill end-card-eyebrow">Comprehensive Guide</span>
               <span class="end-card-label">DFR Playbook</span>
               <a class="btn-ghost end-card-btn" href="https://brincdrones.com/newpagetest/evolution-of-drone-as-first-responder-programs/" target="_blank" rel="noopener">Playbook <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
             </div>
-            <img class="end-card-booklet-img" src="../assets/playbook-booklet.png" alt="BRINC Drone as First Responder Playbook cover" />
+            <div class="end-card-booklet-wrap">
+              <img class="end-card-booklet-img" src="../assets/playbook-booklet.png" alt="BRINC Drone as First Responder Playbook cover" />
+            </div>
             <h3 class="end-card-title">Transforming Emergency Response with Aerial Technology</h3>
             <ul class="end-card-highlights">
               <li>History and evolution of Drone as First Responder</li>
@@ -1630,12 +1630,23 @@
     </div>
 
             <div class="detail-body">
+      <div class="detail-main">
       <div class="description">
         <h2>About this integration</h2>
         <p>ShotSpotter is an acoustic gunshot detection network deployed across hundreds of cities, using rooftop- and streetlight-mounted sensors to detect, locate, and classify gunfire within seconds.</p>
         <p>Paired with BRINC LiveOps, every confirmed ShotSpotter alert — including its precise location and confirmation status — is sent directly to your Guardian dispatch queue, so a drone can be in the air before a 911 call for the same incident even comes in.</p>
         <p>Use cases include faster first-on-scene awareness for shots-fired calls, reduced risk to responding officers by seeing the scene before arrival, and a documented, time-stamped record connecting acoustic detection to aerial response for after-action review.</p>
         <p>Available today for all Guardian customers with an active ShotSpotter subscription — no additional hardware required. Setup is handled through your BRINC LiveOps account team.</p>
+      </div>
+      <div class="benefits-block">
+      <h2>Benefits</h2>
+      <ul class="benefits-list">
+        <li>Faster first-on-scene awareness for shots-fired calls, before officers arrive</li>
+        <li>Reduced risk to responding officers by seeing the scene from the air first</li>
+        <li>A time-stamped record linking acoustic detection to aerial response</li>
+        <li>No additional hardware required for agencies with an active subscription</li>
+      </ul>
+    </div>
       </div>
       <aside class="sidebar">
         <div class="sidebar-block industry-info-block">
@@ -1662,16 +1673,6 @@
           </a>
         </div>
       </aside>
-    </div>
-
-    <div class="benefits-block">
-      <h2>Benefits</h2>
-      <ul class="benefits-list">
-        <li>Faster first-on-scene awareness for shots-fired calls, before officers arrive</li>
-        <li>Reduced risk to responding officers by seeing the scene from the air first</li>
-        <li>A time-stamped record linking acoustic detection to aerial response</li>
-        <li>No additional hardware required for agencies with an active subscription</li>
-      </ul>
     </div>
 
     <!-- Cross-promo CTAs — option 2: 50/50 split banner, now placed after Benefits (dev options: Cross-Promo CTAs / Option 2) -->
@@ -1821,12 +1822,23 @@
     </div>
 
             <div class="detail-body">
+      <div class="detail-main">
       <div class="description">
         <h2>About this integration</h2>
         <p>Motorola's NG911 call-handling platform is the backbone of modern emergency communications centers, managing call intake, location data, and call routing for 911 centers nationwide.</p>
         <p>The LiveOps integration passes calls-for-service information — including the caller's location — from NG911 directly into Guardian, letting dispatchers launch a drone to a verified location without re-keying a single address.</p>
         <p>This removes the manual hand-off between call-taking and drone dispatch, reducing time-to-launch and eliminating a common source of dispatch error: wrong or incomplete addresses.</p>
         <p>Available now. Setup is coordinated between your NG911 system administrator and the BRINC LiveOps onboarding team.</p>
+      </div>
+      <div class="benefits-block">
+      <h2>Benefits</h2>
+      <ul class="benefits-list">
+        <li>Drone dispatch to a verified location without re-keying a single address</li>
+        <li>Removes the manual hand-off between call-taking and drone dispatch</li>
+        <li>Reduces time-to-launch on active calls</li>
+        <li>Eliminates a common source of dispatch error: wrong or incomplete addresses</li>
+      </ul>
+    </div>
       </div>
       <aside class="sidebar">
         <div class="sidebar-block industry-info-block"><h3>Industry</h3><div class="tag-row"><span class="tag-pill industry">Law Enforcement</span><span class="tag-pill industry">Fire</span><span class="tag-pill industry">EMS</span></div></div>
@@ -1850,16 +1862,6 @@
           </a>
         </div>
       </aside>
-    </div>
-
-    <div class="benefits-block">
-      <h2>Benefits</h2>
-      <ul class="benefits-list">
-        <li>Drone dispatch to a verified location without re-keying a single address</li>
-        <li>Removes the manual hand-off between call-taking and drone dispatch</li>
-        <li>Reduces time-to-launch on active calls</li>
-        <li>Eliminates a common source of dispatch error: wrong or incomplete addresses</li>
-      </ul>
     </div>
 
     <!-- Cross-promo CTAs — option 2: 50/50 split banner, now placed after Benefits (dev options: Cross-Promo CTAs / Option 2) -->
@@ -2009,12 +2011,23 @@
     </div>
 
             <div class="detail-body">
+      <div class="detail-main">
       <div class="description">
         <h2>About this integration</h2>
         <p>Live911 streams live 911 call audio and location data directly to first responders in the field — giving officers and drone pilots the same real-time picture dispatch has.</p>
         <p>With this integration, Live911's call location and streaming audio feed into BRINC LiveOps alongside your Guardian video feed, so the RTCC or responding pilot can listen to the call unfold while watching the scene from the air.</p>
         <p>This is especially valuable for ambiguous or evolving calls — domestic disturbances, active alarms, welfare checks — where hearing tone and context from the caller changes how a scene should be approached.</p>
         <p>Available now for agencies running Live911 alongside Guardian.</p>
+      </div>
+      <div class="benefits-block">
+      <h2>Benefits</h2>
+      <ul class="benefits-list">
+        <li>Pilots and RTCC staff hear the call while watching the scene from the air</li>
+        <li>Especially valuable for ambiguous or evolving calls</li>
+        <li>Call location and streaming audio arrive alongside your Guardian video feed</li>
+        <li>No separate system needed to follow the call in progress</li>
+      </ul>
+    </div>
       </div>
       <aside class="sidebar">
         <div class="sidebar-block industry-info-block"><h3>Industry</h3><div class="tag-row"><span class="tag-pill industry">Law Enforcement</span><span class="tag-pill industry">Fire</span><span class="tag-pill industry">EMS</span></div></div>
@@ -2038,16 +2051,6 @@
           </a>
         </div>
       </aside>
-    </div>
-
-    <div class="benefits-block">
-      <h2>Benefits</h2>
-      <ul class="benefits-list">
-        <li>Pilots and RTCC staff hear the call while watching the scene from the air</li>
-        <li>Especially valuable for ambiguous or evolving calls</li>
-        <li>Call location and streaming audio arrive alongside your Guardian video feed</li>
-        <li>No separate system needed to follow the call in progress</li>
-      </ul>
     </div>
 
     <!-- Cross-promo CTAs — option 2: 50/50 split banner, now placed after Benefits (dev options: Cross-Promo CTAs / Option 2) -->
@@ -2197,12 +2200,23 @@
     </div>
 
             <div class="detail-body">
+      <div class="detail-main">
       <div class="description">
         <h2>About this integration</h2>
         <p>"Evidence" is BRINC's digital evidence management pairing — automatically routing footage and telemetry from every Guardian flight into your agency's evidence retention workflow.</p>
         <p>As soon as a flight ends, video, snapshots, and flight metadata are packaged and sent to your connected evidence account, with chain-of-custody metadata intact — no manual export or file transfer required.</p>
         <p>This closes a common gap in drone programs: evidence sitting on a laptop or SD card instead of in the system your legal and records teams already audit.</p>
         <p>Available now; setup takes a single authorization step from your evidence management administrator.</p>
+      </div>
+      <div class="benefits-block">
+      <h2>Benefits</h2>
+      <ul class="benefits-list">
+        <li>Video, snapshots, and metadata sent automatically at the end of every flight</li>
+        <li>Chain-of-custody metadata stays intact, with no manual export</li>
+        <li>Closes the gap of evidence sitting on a laptop or SD card</li>
+        <li>Setup takes a single authorization step</li>
+      </ul>
+    </div>
       </div>
       <aside class="sidebar">
         <div class="sidebar-block industry-info-block"><h3>Industry</h3><div class="tag-row"><span class="tag-pill industry">Law Enforcement</span></div></div>
@@ -2226,16 +2240,6 @@
           </a>
         </div>
       </aside>
-    </div>
-
-    <div class="benefits-block">
-      <h2>Benefits</h2>
-      <ul class="benefits-list">
-        <li>Video, snapshots, and metadata sent automatically at the end of every flight</li>
-        <li>Chain-of-custody metadata stays intact, with no manual export</li>
-        <li>Closes the gap of evidence sitting on a laptop or SD card</li>
-        <li>Setup takes a single authorization step</li>
-      </ul>
     </div>
 
     <!-- Cross-promo CTAs — option 2: 50/50 split banner, now placed after Benefits (dev options: Cross-Promo CTAs / Option 2) -->
@@ -2383,12 +2387,23 @@
     </div>
 
             <div class="detail-body">
+      <div class="detail-main">
       <div class="description">
         <h2>About this integration</h2>
         <p>CommandCentral Aware is Motorola Solutions' real-time crime center platform, unifying camera feeds, sensor alerts, and case data into a single operational view.</p>
         <p>This integration connects BRINC DFR to the extended Motorola Solutions ecosystem — streaming live Guardian drone footage into CommandCentral Aware, and allowing the platform to deploy drones automatically in response to emergency radio pings.</p>
         <p>Analysts get one more live feed alongside their existing camera network, and Guardian gains the ability to be triggered by the same signals — radio traffic, sensor alerts — that already drive your RTCC's workflow.</p>
         <p>Available now for CommandCentral Aware customers running Guardian.</p>
+      </div>
+      <div class="benefits-block">
+      <h2>Benefits</h2>
+      <ul class="benefits-list">
+        <li>Live Guardian footage streams directly into your RTCC view</li>
+        <li>Drones can deploy automatically in response to emergency radio pings</li>
+        <li>Analysts get one more live feed alongside their existing camera network</li>
+        <li>No new application for analysts to learn</li>
+      </ul>
+    </div>
       </div>
       <aside class="sidebar">
         <div class="sidebar-block industry-info-block"><h3>Industry</h3><div class="tag-row"><span class="tag-pill industry">Law Enforcement</span></div></div>
@@ -2412,16 +2427,6 @@
           </a>
         </div>
       </aside>
-    </div>
-
-    <div class="benefits-block">
-      <h2>Benefits</h2>
-      <ul class="benefits-list">
-        <li>Live Guardian footage streams directly into your RTCC view</li>
-        <li>Drones can deploy automatically in response to emergency radio pings</li>
-        <li>Analysts get one more live feed alongside their existing camera network</li>
-        <li>No new application for analysts to learn</li>
-      </ul>
     </div>
 
     <!-- Cross-promo CTAs — option 2: 50/50 split banner, now placed after Benefits (dev options: Cross-Promo CTAs / Option 2) -->
@@ -2571,12 +2576,23 @@
     </div>
 
             <div class="detail-body">
+      <div class="detail-main">
       <div class="description">
         <h2>About this integration</h2>
         <p>Tyler Technologies' CAD platform is used by public safety agencies across the country to manage call intake, unit assignment, and incident records.</p>
         <p>The LiveOps integration sends calls-for-service information — including call location — from Tyler CAD to BRINC LiveOps, so a Guardian drone can be assigned to a call the same way a patrol unit would be.</p>
         <p>Dispatchers see drone status alongside other unit statuses, and responding officers get aerial context before or as they arrive on scene.</p>
         <p>Available now; coordinated setup with your Tyler CAD administrator and BRINC's onboarding team.</p>
+      </div>
+      <div class="benefits-block">
+      <h2>Benefits</h2>
+      <ul class="benefits-list">
+        <li>Guardian is assigned to a call the same way a patrol unit would be</li>
+        <li>Dispatchers see drone status alongside other unit statuses</li>
+        <li>Responding officers get aerial context before or as they arrive</li>
+        <li>Coordinated setup with your existing CAD administrator</li>
+      </ul>
+    </div>
       </div>
       <aside class="sidebar">
         <div class="sidebar-block industry-info-block"><h3>Industry</h3><div class="tag-row"><span class="tag-pill industry">Law Enforcement</span><span class="tag-pill industry">Fire</span><span class="tag-pill industry">EMS</span></div></div>
@@ -2600,16 +2616,6 @@
           </a>
         </div>
       </aside>
-    </div>
-
-    <div class="benefits-block">
-      <h2>Benefits</h2>
-      <ul class="benefits-list">
-        <li>Guardian is assigned to a call the same way a patrol unit would be</li>
-        <li>Dispatchers see drone status alongside other unit statuses</li>
-        <li>Responding officers get aerial context before or as they arrive</li>
-        <li>Coordinated setup with your existing CAD administrator</li>
-      </ul>
     </div>
 
     <!-- Cross-promo CTAs — option 2: 50/50 split banner, now placed after Benefits (dev options: Cross-Promo CTAs / Option 2) -->
@@ -2757,12 +2763,23 @@
     </div>
 
             <div class="detail-body">
+      <div class="detail-main">
       <div class="description">
         <h2>About this integration</h2>
         <p>Vigilant Solutions' automated license plate reader (ALPR) network flags vehicles of interest — stolen vehicles, wanted persons, Amber Alerts — in real time as they pass fixed or mobile readers.</p>
         <p>This integration sends Vigilant's license plate hit locations directly to BRINC LiveOps, giving agencies the option to launch a Guardian drone to visually confirm and track a flagged vehicle before committing patrol units.</p>
         <p>This is particularly useful for pursuit-adjacent scenarios, where getting an early eye in the air reduces the risk of a high-speed vehicle pursuit.</p>
         <p>Available now for agencies with an active Vigilant ALPR deployment.</p>
+      </div>
+      <div class="benefits-block">
+      <h2>Benefits</h2>
+      <ul class="benefits-list">
+        <li>Visually confirm and track a flagged vehicle before committing patrol units</li>
+        <li>Reduces risk in pursuit-adjacent scenarios with an early eye in the air</li>
+        <li>Hit locations reach BRINC LiveOps in real time</li>
+        <li>No manual step between a plate hit and a drone launch</li>
+      </ul>
+    </div>
       </div>
       <aside class="sidebar">
         <div class="sidebar-block industry-info-block"><h3>Industry</h3><div class="tag-row"><span class="tag-pill industry">Law Enforcement</span></div></div>
@@ -2786,16 +2803,6 @@
           </a>
         </div>
       </aside>
-    </div>
-
-    <div class="benefits-block">
-      <h2>Benefits</h2>
-      <ul class="benefits-list">
-        <li>Visually confirm and track a flagged vehicle before committing patrol units</li>
-        <li>Reduces risk in pursuit-adjacent scenarios with an early eye in the air</li>
-        <li>Hit locations reach BRINC LiveOps in real time</li>
-        <li>No manual step between a plate hit and a drone launch</li>
-      </ul>
     </div>
 
     <!-- Cross-promo CTAs — option 2: 50/50 split banner, now placed after Benefits (dev options: Cross-Promo CTAs / Option 2) -->
@@ -2945,12 +2952,23 @@
     </div>
 
             <div class="detail-body">
+      <div class="detail-main">
       <div class="description">
         <h2>About this integration</h2>
         <p>Fusus is a real-time crime center platform that aggregates public and private camera feeds into a single, searchable operational view for law enforcement.</p>
         <p>With this integration, Guardian's live drone footage and location stream directly into your Fusus RTCC — placing aerial video next to your existing camera network rather than in a separate application.</p>
         <p>Analysts can pivot between ground cameras and the drone's aerial view without switching systems, keeping situational awareness centralized during active incidents.</p>
         <p>Available now for Fusus customers running Guardian.</p>
+      </div>
+      <div class="benefits-block">
+      <h2>Benefits</h2>
+      <ul class="benefits-list">
+        <li>Aerial video sits next to your existing camera network, not in a separate app</li>
+        <li>Analysts pivot between ground cameras and drone view without switching systems</li>
+        <li>Keeps situational awareness centralized during active incidents</li>
+        <li>No new login or separate application required</li>
+      </ul>
+    </div>
       </div>
       <aside class="sidebar">
         <div class="sidebar-block industry-info-block"><h3>Industry</h3><div class="tag-row"><span class="tag-pill industry">Law Enforcement</span></div></div>
@@ -2974,16 +2992,6 @@
           </a>
         </div>
       </aside>
-    </div>
-
-    <div class="benefits-block">
-      <h2>Benefits</h2>
-      <ul class="benefits-list">
-        <li>Aerial video sits next to your existing camera network, not in a separate app</li>
-        <li>Analysts pivot between ground cameras and drone view without switching systems</li>
-        <li>Keeps situational awareness centralized during active incidents</li>
-        <li>No new login or separate application required</li>
-      </ul>
     </div>
 
     <!-- Cross-promo CTAs — option 2: 50/50 split banner, now placed after Benefits (dev options: Cross-Promo CTAs / Option 2) -->
@@ -3131,12 +3139,23 @@
     </div>
 
 <div class="detail-body">
+      <div class="detail-main">
       <div class="description">
         <h2>About this integration</h2>
         <p>CommandCentral DEMS is Motorola Solutions' digital evidence management system, used by agencies to store, tag, and manage evidentiary media with chain-of-custody controls.</p>
         <p>This integration automatically sends evidence — video, images, and flight metadata — after every Guardian flight directly into your connected CommandCentral DEMS account.</p>
         <p>Like BRINC's other DEMS integrations, this removes the manual step of exporting and uploading drone footage, keeping your evidence trail consistent whether it came from a body camera, in-car camera, or a Guardian drone.</p>
         <p>Available now for CommandCentral DEMS customers.</p>
+      </div>
+      <div class="benefits-block">
+      <h2>Benefits</h2>
+      <ul class="benefits-list">
+        <li>Every flight's footage and metadata route straight into DEMS — no manual export or SD card</li>
+        <li>Drone footage sits alongside body-cam and in-car video under the same audit trail</li>
+        <li>Investigators find aerial evidence without a separate login or second system</li>
+        <li>Works with your existing CommandCentral DEMS deployment; setup is a single authorization step</li>
+      </ul>
+    </div>
       </div>
       <aside class="sidebar">
         <div class="sidebar-block industry-info-block"><h3>Industry</h3><div class="tag-row"><span class="tag-pill industry">Law Enforcement</span></div></div>
@@ -3160,16 +3179,6 @@
           </a>
         </div>
       </aside>
-    </div>
-
-    <div class="benefits-block">
-      <h2>Benefits</h2>
-      <ul class="benefits-list">
-        <li>Every flight's footage and metadata route straight into DEMS — no manual export or SD card</li>
-        <li>Drone footage sits alongside body-cam and in-car video under the same audit trail</li>
-        <li>Investigators find aerial evidence without a separate login or second system</li>
-        <li>Works with your existing CommandCentral DEMS deployment; setup is a single authorization step</li>
-      </ul>
     </div>
 
     <!-- Cross-promo CTAs — option 2: 50/50 split banner, now placed after Benefits (dev options: Cross-Promo CTAs / Option 2) -->
@@ -3331,12 +3340,23 @@
     </div>
 
             <div class="detail-body">
+      <div class="detail-main">
       <div class="description">
         <h2>About this integration</h2>
         <p>AirData is a flight-data management platform used by drone programs to centralize logs, maintenance records, and compliance documentation across mixed fleets of aircraft.</p>
         <p>This integration stores Guardian's flight logs in AirData alongside logs from your other drone platforms, streamlining reporting and maintenance tracking for programs that fly more than one type of aircraft.</p>
         <p>Useful for FAA compliance reporting, fleet utilization analysis, and giving program managers a single source of truth for flight history regardless of which drone flew the mission.</p>
         <p>Available now; connect your AirData account from your BRINC LiveOps settings.</p>
+      </div>
+      <div class="benefits-block">
+      <h2>Benefits</h2>
+      <ul class="benefits-list">
+        <li>Single flight-history record across every aircraft in your fleet, not just Guardian</li>
+        <li>Faster FAA compliance reporting, without manual log exports between systems</li>
+        <li>Fleet-wide utilization data that supports smarter maintenance scheduling</li>
+        <li>One source of truth for program managers, regardless of which drone flew the mission</li>
+      </ul>
+    </div>
       </div>
       <aside class="sidebar">
         <div class="sidebar-block industry-info-block"><h3>Industry</h3><div class="tag-row"><span class="tag-pill industry">Fire</span><span class="tag-pill industry">Law Enforcement</span></div></div>
@@ -3360,16 +3380,6 @@
           </a>
         </div>
       </aside>
-    </div>
-
-    <div class="benefits-block">
-      <h2>Benefits</h2>
-      <ul class="benefits-list">
-        <li>Single flight-history record across every aircraft in your fleet, not just Guardian</li>
-        <li>Faster FAA compliance reporting, without manual log exports between systems</li>
-        <li>Fleet-wide utilization data that supports smarter maintenance scheduling</li>
-        <li>One source of truth for program managers, regardless of which drone flew the mission</li>
-      </ul>
     </div>
 
     <!-- Cross-promo CTAs — option 2: 50/50 split banner, now placed after Benefits (dev options: Cross-Promo CTAs / Option 2) -->
@@ -3519,12 +3529,23 @@
     </div>
 
             <div class="detail-body">
+      <div class="detail-main">
       <div class="description">
         <h2>About this integration</h2>
         <p>APX NEXT is Motorola's smart radio platform, used widely by public safety agencies for day-to-day voice communications.</p>
         <p>This integration sends Guardian to emergency pings triggered from APX NEXT radios — meaning an officer's emergency button, not just a 911 call, can be the trigger that launches a drone to their location.</p>
         <p>This adds a second, independent path to get eyes in the air fast — valuable in situations where an officer needs backup awareness before dispatch has fully processed a call.</p>
         <p>Available now for agencies running APX NEXT radios with emergency alerting enabled.</p>
+      </div>
+      <div class="benefits-block">
+      <h2>Benefits</h2>
+      <ul class="benefits-list">
+        <li>An officer's emergency button, not just a 911 call, can launch a drone</li>
+        <li>A second, independent path to get eyes in the air fast</li>
+        <li>Valuable backup awareness before dispatch fully processes a call</li>
+        <li>Works with radios that already have emergency alerting enabled</li>
+      </ul>
+    </div>
       </div>
       <aside class="sidebar">
         <div class="sidebar-block industry-info-block"><h3>Industry</h3><div class="tag-row"><span class="tag-pill industry">Law Enforcement</span><span class="tag-pill industry">Fire</span><span class="tag-pill industry">EMS</span></div></div>
@@ -3548,16 +3569,6 @@
           </a>
         </div>
       </aside>
-    </div>
-
-    <div class="benefits-block">
-      <h2>Benefits</h2>
-      <ul class="benefits-list">
-        <li>An officer's emergency button, not just a 911 call, can launch a drone</li>
-        <li>A second, independent path to get eyes in the air fast</li>
-        <li>Valuable backup awareness before dispatch fully processes a call</li>
-        <li>Works with radios that already have emergency alerting enabled</li>
-      </ul>
     </div>
 
     <!-- Cross-promo CTAs — option 2: 50/50 split banner, now placed after Benefits (dev options: Cross-Promo CTAs / Option 2) -->
@@ -3737,12 +3748,23 @@
     </div>
 
             <div class="detail-body">
+      <div class="detail-main">
       <div class="description">
         <h2>About this integration</h2>
         <p>CentralSquare's CAD platform supports call intake and dispatch for public safety agencies of all sizes, from small municipalities to large regional consolidated centers.</p>
         <p>The LiveOps integration sends calls-for-service information — including call location — from CentralSquare CAD to BRINC LiveOps, enabling Guardian to be dispatched as part of the same workflow used to send patrol units.</p>
         <p>This keeps drone dispatch inside your existing CAD-driven process rather than requiring a separate system or manual radio call to request air support.</p>
         <p>Available now; coordinated setup with your CentralSquare administrator.</p>
+      </div>
+      <div class="benefits-block">
+      <h2>Benefits</h2>
+      <ul class="benefits-list">
+        <li>Guardian dispatched as part of the same workflow used for patrol units</li>
+        <li>Keeps drone dispatch inside your existing CAD-driven process</li>
+        <li>No separate system or manual radio call needed to request air support</li>
+        <li>Coordinated setup with your existing CentralSquare administrator</li>
+      </ul>
+    </div>
       </div>
       <aside class="sidebar">
         <div class="sidebar-block industry-info-block"><h3>Industry</h3><div class="tag-row"><span class="tag-pill industry">Law Enforcement</span><span class="tag-pill industry">Fire</span><span class="tag-pill industry">EMS</span></div></div>
@@ -3766,16 +3788,6 @@
           </a>
         </div>
       </aside>
-    </div>
-
-    <div class="benefits-block">
-      <h2>Benefits</h2>
-      <ul class="benefits-list">
-        <li>Guardian dispatched as part of the same workflow used for patrol units</li>
-        <li>Keeps drone dispatch inside your existing CAD-driven process</li>
-        <li>No separate system or manual radio call needed to request air support</li>
-        <li>Coordinated setup with your existing CentralSquare administrator</li>
-      </ul>
     </div>
 
     <!-- Cross-promo CTAs — option 2: 50/50 split banner, now placed after Benefits (dev options: Cross-Promo CTAs / Option 2) -->
@@ -3993,7 +4005,7 @@
     var diagram = document.querySelector('.hero-visual .ecosystem-diagram');
     if (!svg || !diagram) return;
     var centerCard = diagram.querySelector('.center-card');
-    var CORNER_R = 14;
+    var CORNER_R = 14; // recomputed in build() to scale with the diagram's own rendered width
 
     // offsetTop/offsetLeft/offsetWidth/offsetHeight reflect an element's normal-flow layout box and
     // are immune to CSS transforms — unlike getBoundingClientRect(), which was sampling cards mid
@@ -4032,6 +4044,7 @@
 
       var dRect = diagram.getBoundingClientRect();
       svg.setAttribute('viewBox', '0 0 ' + Math.round(dRect.width) + ' ' + Math.round(dRect.height));
+      CORNER_R = dRect.width * (14 / 1360); // same ratio as the QHD reference width, so the elbow radius shrinks with the diagram instead of looking relatively bigger at FullHD
 
       var leftCards = [].slice.call(diagram.querySelectorAll('.eco-card.side-left')).sort(function (a, b) {
         return a.getBoundingClientRect().top - b.getBoundingClientRect().top;
